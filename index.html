@@ -2,219 +2,184 @@
 <html lang="pt-BR">
 <head>
     <meta charset="UTF-8">
-    <!-- A tag abaixo evita que o cliente dê zoom na tela sem querer ao raspar -->
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Raspadinha Premiada - Posto</title>
+    <title>Raspadinha Premiada - Posto Ipiranga</title>
+    <!-- Fonte Moderna -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700;800&display=swap" rel="stylesheet">
+    <!-- Biblioteca de Confetes -->
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
     <style>
         :root {
-            --bg-color: #f0f4f8;
-            --card-bg: #ffffff;
-            --primary-text: #1f2937;
-            --accent-color: #3b82f6;
+            --primary: #FFD700; /* Cor da sua marca */
+            --dark: #1a1a1a;
+            --white: #ffffff;
+            --shadow: 0 10px 30px rgba(0,0,0,0.15);
         }
 
-        body { 
-            font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; 
-            text-align: center; 
-            background-color: var(--bg-color); 
-            margin: 0; 
-            padding: 20px; 
+        body {
+            font-family: 'Inter', sans-serif;
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            margin: 0;
             display: flex;
-            flex-direction: column;
+            justify-content: center;
             align-items: center;
             min-height: 100vh;
+            color: var(--dark);
         }
 
-        .container { 
-            max-width: 400px; 
-            width: 100%;
-            background: var(--card-bg); 
-            padding: 30px 20px; 
-            border-radius: 20px; 
-            box-shadow: 0 10px 25px rgba(0,0,0,0.08); 
-            box-sizing: border-box;
-            margin-top: 20px;
-        }
-
-        h2 { color: var(--primary-text); margin-top: 0; font-size: 24px; }
-        p { color: #6b7280; font-size: 15px; line-height: 1.5; margin-bottom: 25px; }
-
-        .scratch-wrapper { 
-            position: relative; 
-            width: 300px; 
-            height: 150px; 
-            margin: 0 auto; 
-            user-select: none; 
-            border-radius: 12px;
-            overflow: hidden;
-            box-shadow: inset 0 0 10px rgba(0,0,0,0.1);
-        }
-
-        .prize-container { 
-            position: absolute; 
-            top: 0; left: 0; 
-            width: 100%; height: 100%; 
-            display: flex; 
-            align-items: center; 
-            justify-content: center; 
-            background: #eef2ff; 
-            z-index: 1; 
-        }
-
-        .prize-text {
-            font-size: 22px; 
-            font-weight: 800; 
-            color: #4338ca; 
-            padding: 0 15px;
+        .card {
+            background: var(--white);
+            padding: 2rem;
+            border-radius: 25px;
+            box-shadow: var(--shadow);
+            width: 90%;
+            max-width: 400px;
             text-align: center;
         }
 
-        canvas { 
-            position: absolute; 
-            top: 0; left: 0; 
-            z-index: 2; 
-            cursor: pointer;
-            transition: opacity 0.5s ease-out;
+        .header h1 { font-size: 1.5rem; margin-bottom: 0.5rem; }
+        .header p { color: #666; margin-bottom: 2rem; }
+
+        .scratch-area {
+            position: relative;
+            width: 300px;
+            height: 150px;
+            margin: 0 auto;
+            border-radius: 15px;
+            overflow: hidden;
+            border: 4px solid #eee;
+            background: #f8f8f8;
         }
 
-        .footer-text { font-size: 13px; color: #9ca3af; margin-top: 25px; }
+        canvas { position: absolute; top: 0; left: 0; z-index: 2; cursor: pointer; touch-action: none; }
+        
+        .prize-display {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            background: #fff;
+            z-index: 1;
+        }
 
-        /* Animação de revelação */
-        .fade-out { opacity: 0; pointer-events: none; }
+        /* Modal Premium */
+        #result-modal {
+            display: none;
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.8);
+            justify-content: center;
+            align-items: center;
+            z-index: 10;
+        }
+        .modal-content {
+            background: white;
+            padding: 2rem;
+            border-radius: 20px;
+            max-width: 80%;
+            transform: scale(0.9);
+            transition: transform 0.3s;
+        }
     </style>
 </head>
 <body>
 
-<div class="container">
-    <h2>Sorte no Posto! ⛽</h2>
-    <p>Passe o dedo na área cinza para descobrir se você ganhou um prêmio hoje.</p>
-    
-    <div class="scratch-wrapper">
-        <div class="prize-container">
-            <span class="prize-text" id="prize-text">Carregando...</span>
+<div class="card">
+    <div class="header">
+        <h1>Sorte no Posto! ⛽</h1>
+        <p>Raspe e descubra seu brinde.</p>
+    </div>
+
+    <div class="scratch-area" id="scratch-container">
+        <div class="prize-display" id="prize-box">
+            <span id="prize-text">Carregando...</span>
         </div>
         <canvas id="scratch-canvas" width="300" height="150"></canvas>
     </div>
-    
-    <div class="footer-text">
-        Mostre esta tela no caixa antes de sair para resgatar seu prêmio. Válido apenas para o dia de hoje.
+</div>
+
+<!-- Modal de Sucesso -->
+<div id="result-modal">
+    <div class="modal-content">
+        <h2 id="modal-title">Parabéns!</h2>
+        <p id="modal-desc"></p>
+        <button onclick="window.location.reload()" style="padding: 10px 20px; border-radius: 10px; border: none; background: var(--primary); cursor: pointer;">Fechar</button>
     </div>
 </div>
 
 <script>
-    document.addEventListener("DOMContentLoaded", function() {
-        const canvas = document.getElementById('scratch-canvas');
-        const ctx = canvas.getContext('2d', { willReadFrequently: true });
-        const prizeTextElement = document.getElementById('prize-text');
+    const canvas = document.getElementById('scratch-canvas');
+    const ctx = canvas.getContext('2d', { willReadFrequently: true });
+    const modal = document.getElementById('result-modal');
+    
+    // Probabilidades (Soma deve ser 100)
+    const premios = [
+        { nome: "Tente Novamente", peso: 70, win: false },
+        { nome: "1 Água Mineral", peso: 20, win: true },
+        { nome: "1 Picolé", peso: 10, win: true }
+    ];
 
-        // --- CONFIGURAÇÃO DOS PRÊMIOS E PROBABILIDADES ---
-        // O "peso" define a chance. Quanto maior o peso, maior a chance de sair.
-        const premios = [
-            { nome: "Tente Novamente! 😅", peso: 70 }, // 70% de chance
-            { nome: "1 Água Mineral 💧", peso: 20 },  // 20% de chance
-            { nome: "1 Picolé 🍦", peso: 10 }         // 10% de chance
-        ];
-
-        // Função para sortear com base nos pesos
-        function sortearPremio() {
-            const pesoTotal = premios.reduce((soma, premio) => soma + premio.peso, 0);
-            let numeroSorteado = Math.random() * pesoTotal;
-            
-            for (let premio of premios) {
-                if (numeroSorteado < premio.peso) return premio.nome;
-                numeroSorteado -= premio.peso;
-            }
-            return premios[0].nome; // Fallback de segurança
+    function sortear() {
+        let r = Math.random() * 100;
+        let acum = 0;
+        for(let p of premios) {
+            acum += p.peso;
+            if(r < acum) return p;
         }
+    }
 
-        // --- SISTEMA ANTI-FRAUDE ---
-        if (localStorage.getItem('posto_ja_jogou')) {
-            prizeTextElement.innerText = "Você já jogou hoje!";
-            prizeTextElement.style.color = "#dc2626"; // Vermelho
-            canvas.style.display = 'none'; // Esconde a raspadinha
-            return; // Para a execução do código aqui
-        }
+    const sorteado = sortear();
+    document.getElementById('prize-text').innerText = sorteado.nome;
 
-        // Define o prêmio do usuário
-        const premioSorteado = sortearPremio();
-        prizeTextElement.innerText = premioSorteado;
+    // Desenhar Raspadinha
+    ctx.fillStyle = '#C0C0C0';
+    ctx.fillRect(0, 0, 300, 150);
+    ctx.fillStyle = '#333';
+    ctx.font = '20px Arial';
+    ctx.textAlign = 'center';
+    ctx.fillText('RASPE AQUI', 150, 85);
 
-        // --- DESENHO DA COBERTURA (A RASPADA) ---
-        ctx.fillStyle = '#a1a1aa'; // Cor cinza bonita
-        ctx.fillRect(0, 0, canvas.width, canvas.height);
+    let isDrawing = false;
+    let finished = false;
+
+    function scratch(e) {
+        if(!isDrawing || finished) return;
+        const rect = canvas.getBoundingClientRect();
+        const x = (e.touches ? e.touches[0].clientX : e.clientX) - rect.left;
+        const y = (e.touches ? e.touches[0].clientY : e.clientY) - rect.top;
+
+        ctx.globalCompositeOperation = 'destination-out';
+        ctx.beginPath();
+        ctx.arc(x, y, 25, 0, Math.PI*2);
+        ctx.fill();
+
+        // Verificar conclusão
+        const data = ctx.getImageData(0,0,300,150).data;
+        let count = 0;
+        for(let i=3; i<data.length; i+=4) if(data[i] == 0) count++;
         
-        // Adiciona um texto por cima do cinza
-        ctx.fillStyle = '#f4f4f5';
-        ctx.font = 'bold 24px sans-serif';
-        ctx.textAlign = 'center';
-        ctx.textBaseline = 'middle';
-        ctx.fillText('RASPE AQUI', canvas.width / 2, canvas.height / 2);
-
-        // --- LÓGICA DE RASPAR ---
-        let isDrawing = false;
-        let areaRevelada = false;
-
-        function getCoordinates(e) {
-            const rect = canvas.getBoundingClientRect();
-            // Pega a posição exata dependendo se é mouse ou toque na tela
-            const clientX = e.touches ? e.touches[0].clientX : e.clientX;
-            const clientY = e.touches ? e.touches[0].clientY : e.clientY;
-            return {
-                x: clientX - rect.left,
-                y: clientY - rect.top
-            };
-        }
-
-        function scratch(e) {
-            if (!isDrawing || areaRevelada) return;
-            e.preventDefault(); // Impede a tela de rolar enquanto raspa
-
-            const pos = getCoordinates(e);
-
-            ctx.globalCompositeOperation = 'destination-out';
-            ctx.beginPath();
-            ctx.arc(pos.x, pos.y, 22, 0, Math.PI * 2); // Tamanho da "moeda" que raspa
-            ctx.fill();
-
-            verificarPorcentagem();
-        }
-
-        // --- LÓGICA DE AUTO-REVELAÇÃO (O SEGREDO DA QUALIDADE) ---
-        function verificarPorcentagem() {
-            // Conta os pixels para ver quanto já foi raspado
-            const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
-            const pixels = imageData.data;
-            let pixelsTransparentes = 0;
-
-            // Pula de 4 em 4 (RGBA) e verifica o Canal Alpha (transparência)
-            for (let i = 3; i < pixels.length; i += 4) {
-                if (pixels[i] === 0) pixelsTransparentes++;
+        if(count > 10000 && !finished) {
+            finished = true;
+            if(sorteado.win) {
+                confetti({ particleCount: 150, spread: 70, origin: { y: 0.6 } });
+                document.getElementById('modal-title').innerText = "Você Ganhou!";
+            } else {
+                document.getElementById('modal-title').innerText = "Poxa vida...";
             }
-
-            const totalPixels = pixels.length / 4;
-            const porcentagemRaspada = (pixelsTransparentes / totalPixels) * 100;
-
-            // Se raspar mais de 45%, revela tudo automaticamente
-            if (porcentagemRaspada > 45) {
-                areaRevelada = true;
-                canvas.classList.add('fade-out'); // Animação de sumir
-                
-                // Salva no navegador que o cliente já jogou
-                localStorage.setItem('posto_ja_jogou', 'true');
-            }
+            document.getElementById('modal-desc').innerText = sorteado.nome;
+            setTimeout(() => modal.style.display = 'flex', 500);
         }
+    }
 
-        // --- EVENTOS DE MOUSE E TOQUE ---
-        canvas.addEventListener('mousedown', (e) => { isDrawing = true; scratch(e); });
-        canvas.addEventListener('mouseup', () => isDrawing = false);
-        canvas.addEventListener('mousemove', scratch);
-        canvas.addEventListener('mouseleave', () => isDrawing = false);
-
-        canvas.addEventListener('touchstart', (e) => { isDrawing = true; scratch(e); }, { passive: false });
-        canvas.addEventListener('touchend', () => isDrawing = false);
-        canvas.addEventListener('touchmove', scratch, { passive: false });
-    });
+    canvas.onmousedown = () => isDrawing = true;
+    canvas.onmouseup = () => isDrawing = false;
+    canvas.onmousemove = scratch;
+    canvas.ontouchstart = (e) => { isDrawing = true; scratch(e); };
+    canvas.ontouchend = () => isDrawing = false;
+    canvas.ontouchmove = scratch;
 </script>
-
 </body>
 </html>
