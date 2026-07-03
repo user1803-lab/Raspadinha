@@ -3,184 +3,119 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Sorteio Premium - Posto</title>
+    <title>Posto Certo 6 - Sorteio Premiado</title>
     
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&family=Libre+Barcode+39+Text&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
     
     <style>
         :root {
-            --bg-dark: #0a192f;
-            --brand-gold: #FFD700;
-            --brand-gold-dark: #B8860B;
-            --ticket-bg: #fdfbf7;
-            --text-dark: #1f2937;
+            --p-blue: #004a99;
+            --p-green: #28a745;
+            --p-yellow: #ffc107;
+            --p-white: #ffffff;
+            --p-dark: #1a1a1a;
         }
 
         body {
             font-family: 'Inter', sans-serif;
-            background: var(--bg-dark);
+            /* Fundo com imagem do posto */
+            background-image: url('https://via.placeholder.com/1920x1080/004a99/ffffff?text=FOTO+DO+POSTO+AQUI'); 
+            background-size: cover;
+            background-position: center;
+            background-attachment: fixed;
             margin: 0;
             display: flex;
             justify-content: center;
             align-items: center;
             min-height: 100vh;
-            color: var(--text-dark);
-            overflow: hidden; /* Para o fundo dinâmico não gerar rolagem */
+            color: var(--p-dark);
+            overflow: hidden;
         }
 
-        /* Fundo com Partículas Animadas (Puro CSS) */
-        .particles-bg {
-            position: absolute;
-            top: 0; left: 0; width: 100%; height: 100%;
-            background-image: 
-                radial-gradient(circle at 15% 50%, rgba(255, 215, 0, 0.08) 0%, transparent 50%),
-                radial-gradient(circle at 85% 30%, rgba(255, 215, 0, 0.05) 0%, transparent 50%);
-            z-index: 0;
-            animation: pulse 8s infinite alternate;
+        /* Overlay escuro para garantir leitura */
+        body::before {
+            content: ''; position: absolute; top:0; left:0; width:100%; height:100%;
+            background: rgba(0, 74, 153, 0.7); z-index: 0;
         }
 
-        @keyframes pulse {
-            0% { opacity: 0.6; transform: scale(1); }
-            100% { opacity: 1; transform: scale(1.1); }
-        }
-
-        /* Design do Bilhete Físico */
         .ticket-wrapper {
-            position: relative;
-            z-index: 1;
-            background: var(--ticket-bg);
-            width: 90%;
-            max-width: 360px;
-            border-radius: 12px;
-            padding: 25px 20px;
-            box-shadow: 0 20px 50px rgba(0,0,0,0.5);
-            /* Efeito serrilhado nas bordas (furos do ticket) */
-            background-image: radial-gradient(circle at 0 50%, var(--bg-dark) 12px, transparent 13px),
-                              radial-gradient(circle at 100% 50%, var(--bg-dark) 12px, transparent 13px);
+            position: relative; z-index: 1; background: var(--p-white);
+            width: 90%; max-width: 360px; border-radius: 20px;
+            padding: 25px 20px; box-shadow: 0 20px 50px rgba(0,0,0,0.3);
         }
 
         .ticket-header { text-align: center; margin-bottom: 20px; }
-        .ticket-header h1 { font-size: 22px; margin: 0 0 5px 0; color: #111; text-transform: uppercase; letter-spacing: 1px; }
-        .ticket-header p { font-size: 14px; color: #666; margin: 0; }
+        .ticket-header h1 { font-size: 22px; margin: 0; color: var(--p-blue); text-transform: uppercase; }
 
-        /* Área da Raspadinha */
         .scratch-container {
-            position: relative;
-            width: 300px;
-            height: 150px;
-            margin: 0 auto;
-            border-radius: 10px;
-            overflow: hidden;
-            border: 3px solid #e5e7eb;
-            box-shadow: inset 0 0 20px rgba(0,0,0,0.1);
-            background: #fff;
+            position: relative; width: 300px; height: 150px;
+            margin: 0 auto; border-radius: 10px; overflow: hidden;
+            border: 4px solid var(--p-yellow); box-shadow: 0 4px 10px rgba(0,0,0,0.1);
         }
 
-        /* Fundo de Segurança do Prêmio (Marca d'água) */
+        /* Bolinha de guia (Guia de raspagem) */
+        .visual-cue {
+            position: absolute; top: 50%; left: 50%; width: 50px; height: 50px;
+            background: rgba(255, 255, 255, 0.4); border: 2px solid white;
+            border-radius: 50%; z-index: 3; pointer-events: none;
+            animation: moveBall 2s infinite ease-in-out;
+        }
+        @keyframes moveBall {
+            0%, 100% { transform: translate(-100%, -50%); }
+            50% { transform: translate(50%, -50%); }
+        }
+
         .prize-content {
-            position: absolute;
-            top: 0; left: 0; width: 100%; height: 100%;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            background: repeating-linear-gradient(45deg, #f0f0f0, #f0f0f0 10px, #ffffff 10px, #ffffff 20px);
-            z-index: 1;
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+            display: flex; flex-direction: column; justify-content: center;
+            align-items: center; background: #eee; z-index: 1;
         }
 
-        .prize-text { font-size: 24px; font-weight: 800; color: #d97706; text-align: center; line-height: 1.2;}
-        .prize-sub { font-size: 12px; color: #999; margin-top: 5px; text-transform: uppercase; letter-spacing: 2px;}
+        .prize-text { font-size: 20px; font-weight: 800; color: var(--p-green); }
 
-        canvas { position: absolute; top: 0; left: 0; z-index: 2; cursor: pointer; touch-action: none; transition: opacity 0.5s; }
+        canvas { position: absolute; top: 0; left: 0; z-index: 4; cursor: pointer; touch-action: none; }
 
-        /* Barra de Progresso */
-        .progress-wrapper { margin-top: 15px; text-align: center; }
-        .progress-text { font-size: 12px; font-weight: 600; color: #888; margin-bottom: 5px; }
-        .progress-bar { width: 100%; height: 6px; background: #eee; border-radius: 3px; overflow: hidden; }
-        .progress-fill { height: 100%; width: 0%; background: var(--brand-gold); transition: width 0.1s; }
-
-        /* Rodapé com Código de Barras */
-        .ticket-footer { margin-top: 25px; text-align: center; border-top: 2px dashed #ccc; padding-top: 15px; }
-        .barcode { font-family: 'Libre Barcode 39 Text', cursive; font-size: 36px; color: #333; line-height: 1; margin-bottom: 5px; }
-        .serial-number { font-size: 10px; color: #999; font-family: monospace; }
-
-        /* Modal Premium (Cupom) */
-        #result-modal {
-            display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(10, 25, 47, 0.9); justify-content: center; align-items: center; z-index: 10;
-            opacity: 0; transition: opacity 0.4s ease;
-        }
-        
-        .coupon-box {
-            background: #fff; width: 85%; max-width: 320px; padding: 30px 20px;
-            border-radius: 16px; text-align: center;
-            border: 2px dashed var(--brand-gold-dark);
-            box-shadow: 0 0 40px rgba(255, 215, 0, 0.2);
-            transform: translateY(20px); transition: transform 0.4s ease;
+        /* Nome do Posto embaixo */
+        .station-name {
+            text-align: center; font-weight: 900; color: var(--p-blue);
+            margin-top: 15px; font-size: 18px; text-transform: uppercase;
         }
 
-        .coupon-box h2 { color: #111; margin-top: 0; font-size: 26px; }
-        .coupon-box .prize-won { font-size: 22px; font-weight: 800; color: #d97706; margin: 15px 0; background: #fffbeb; padding: 10px; border-radius: 8px;}
-        
-        .timer-box { background: #fee2e2; color: #dc2626; padding: 10px; border-radius: 8px; font-weight: bold; margin-bottom: 20px; font-size: 14px; }
-        #countdown { font-size: 20px; display: block; margin-top: 5px; }
-        
-        .btn-claim {
-            background: linear-gradient(to right, var(--brand-gold), #fbbf24);
-            color: #000; border: none; padding: 14px 24px; font-size: 16px; font-weight: bold;
-            border-radius: 50px; cursor: pointer; width: 100%; box-shadow: 0 4px 15px rgba(251, 191, 36, 0.4);
-            animation: pulse-btn 2s infinite;
-        }
+        .progress-bar { width: 100%; height: 6px; background: #eee; border-radius: 3px; margin-top: 10px; overflow: hidden; }
+        .progress-fill { height: 100%; width: 0%; background: var(--p-green); transition: width 0.1s; }
 
-        @keyframes pulse-btn {
-            0% { transform: scale(1); }
-            50% { transform: scale(1.05); }
-            100% { transform: scale(1); }
-        }
+        /* Modal */
+        #result-modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); z-index: 10; align-items: center; justify-content: center; }
+        .coupon-box { background: white; padding: 30px; border-radius: 20px; text-align: center; width: 80%; }
+        .btn-claim { background: var(--p-yellow); border: none; padding: 12px 25px; border-radius: 50px; font-weight: bold; cursor: pointer; margin-top: 20px; }
     </style>
 </head>
 <body>
 
-<div class="particles-bg"></div>
-
 <div class="ticket-wrapper">
     <div class="ticket-header">
-        <h1>Sorte no Posto</h1>
-        <p>Raspe para descobrir seu brinde</p>
+        <h1>Sorteio Premiado</h1>
     </div>
 
-    <div class="scratch-container">
+    <div class="scratch-container" id="scratch-box">
+        <div class="visual-cue" id="cue"></div>
         <div class="prize-content">
-            <span class="prize-sub">Prêmio Oculto:</span>
             <span class="prize-text" id="prize-text">Carregando...</span>
         </div>
         <canvas id="scratch-canvas" width="300" height="150"></canvas>
     </div>
+    
+    <div class="station-name">Posto Certo 6</div>
 
-    <div class="progress-wrapper">
-        <div class="progress-text">Progresso: <span id="progress-percent">0</span>%</div>
-        <div class="progress-bar"><div class="progress-fill" id="progress-fill"></div></div>
-    </div>
-
-    <div class="ticket-footer">
-        <div class="barcode">POSTO2026</div>
-        <div class="serial-number">S/N: 00482-BR-2026</div>
-    </div>
+    <div class="progress-bar"><div class="progress-fill" id="progress-fill"></div></div>
 </div>
 
 <div id="result-modal">
-    <div class="coupon-box" id="coupon-box">
+    <div class="coupon-box">
         <h2 id="modal-title">Parabéns!</h2>
-        <p style="color: #555; font-size: 14px; margin-bottom: 5px;">Você acaba de ganhar:</p>
-        <div class="prize-won" id="modal-desc">1 Picolé</div>
-        
-        <div class="timer-box" id="timer-box">
-            Válido apenas por:
-            <span id="countdown">15:00</span>
-        </div>
-        
-        <button class="btn-claim" onclick="window.location.reload()">Finalizar e Sair</button>
+        <p id="modal-desc"></p>
+        <button class="btn-claim" onclick="window.location.reload()">Finalizar</button>
     </div>
 </div>
 
@@ -188,194 +123,63 @@
     document.addEventListener("DOMContentLoaded", function() {
         const canvas = document.getElementById('scratch-canvas');
         const ctx = canvas.getContext('2d', { willReadFrequently: true });
+        const cue = document.getElementById('cue');
         
-        // Probabilidades
         const premios = [
-            { nome: "Não foi dessa vez!", peso: 70, win: false },
-            { nome: "1 Água Mineral", peso: 20, win: true },
-            { nome: "1 Picolé", peso: 10, win: true }
+            { nome: "Tente novamente!", win: false },
+            { nome: "1 Água Mineral", win: true },
+            { nome: "1 Picolé", win: true }
         ];
 
-        function sortear() {
-            let r = Math.random() * 100;
-            let acum = 0;
-            for(let p of premios) { acum += p.peso; if(r < acum) return p; }
-            return premios[0];
-        }
-
-        const sorteado = sortear();
+        const sorteado = premios[Math.floor(Math.random() * premios.length)];
         document.getElementById('prize-text').innerText = sorteado.nome;
 
-        // --- SISTEMA DE ÁUDIO UX (SINTÉTICO E SEGURO) ---
-        let audioCtx, noiseSource, gainNode;
-        let audioInitialized = false;
+        // Desenhar Raspadinha (Azul do Posto)
+        ctx.fillStyle = '#004a99';
+        ctx.fillRect(0, 0, 300, 150);
+        ctx.fillStyle = '#ffc107'; // Amarelo do Posto
+        ctx.font = 'bold 20px Inter'; ctx.textAlign = 'center';
+        ctx.fillText('RASPE AQUI', 150, 85);
 
-        function initAudio() {
-            if(audioInitialized) return;
-            audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-            
-            // Criando som de "areia/raspadinha" usando ruído branco (White Noise)
-            const bufferSize = audioCtx.sampleRate * 2;
-            const buffer = audioCtx.createBuffer(1, bufferSize, audioCtx.sampleRate);
-            const data = buffer.getChannelData(0);
-            for (let i = 0; i < bufferSize; i++) data[i] = Math.random() * 2 - 1;
-            
-            noiseSource = audioCtx.createBufferSource();
-            noiseSource.buffer = buffer;
-            noiseSource.loop = true;
-            
-            // Filtro para soar mais como papel raspando
-            const filter = audioCtx.createBiquadFilter();
-            filter.type = 'bandpass'; filter.frequency.value = 1500;
-            
-            gainNode = audioCtx.createGain(); gainNode.gain.value = 0;
-            noiseSource.connect(filter); filter.connect(gainNode); gainNode.connect(audioCtx.destination);
-            noiseSource.start();
-            audioInitialized = true;
-        }
-
-        function playWinSound() {
-            if(!audioCtx) return;
-            const osc = audioCtx.createOscillator();
-            const gain = audioCtx.createGain();
-            osc.type = 'sine';
-            osc.frequency.setValueAtTime(523.25, audioCtx.currentTime); // Nota Dó
-            osc.frequency.setValueAtTime(659.25, audioCtx.currentTime + 0.1); // Nota Mi
-            osc.frequency.setValueAtTime(783.99, audioCtx.currentTime + 0.2); // Nota Sol
-            osc.connect(gain); gain.connect(audioCtx.destination); osc.start();
-            gain.gain.setValueAtTime(0.5, audioCtx.currentTime);
-            gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 1);
-            osc.stop(audioCtx.currentTime + 1);
-        }
-
-        // --- DESENHAR TEXTURA METÁLICA (DOURADA) NO CANVAS ---
-        function desenharTextura() {
-            // Gradiente Dourado
-            let gradient = ctx.createLinearGradient(0, 0, canvas.width, canvas.height);
-            gradient.addColorStop(0, "#C59341");
-            gradient.addColorStop(0.3, "#E5C87E");
-            gradient.addColorStop(0.5, "#FFF1BA");
-            gradient.addColorStop(0.7, "#E5C87E");
-            gradient.addColorStop(1, "#C59341");
-            ctx.fillStyle = gradient;
-            ctx.fillRect(0, 0, canvas.width, canvas.height);
-
-            // Adicionando um pouco de "ruído" visual para parecer tinta raspável
-            const imgData = ctx.getImageData(0,0, canvas.width, canvas.height);
-            for(let i = 0; i < imgData.data.length; i += 4) {
-                let ruido = (Math.random() - 0.5) * 30; // Granulação leve
-                imgData.data[i] += ruido; imgData.data[i+1] += ruido; imgData.data[i+2] += ruido;
-            }
-            ctx.putImageData(imgData, 0, 0);
-
-            // Texto "RASPE AQUI"
-            ctx.fillStyle = 'rgba(0,0,0,0.4)';
-            ctx.font = 'bold 22px Inter, sans-serif';
-            ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
-            ctx.fillText('RASPE AQUI', canvas.width / 2, canvas.height / 2);
-        }
-        
-        desenharTextura();
-
-        // --- LÓGICA DE RASPAR E PROGRESSO ---
-        let isDrawing = false;
         let finished = false;
 
-        function startDrawing(e) {
-            initAudio(); // Inicia o motor de áudio no primeiro toque
-            isDrawing = true;
-            if(audioCtx && audioCtx.state === 'suspended') audioCtx.resume();
-            if(gainNode && !finished) gainNode.gain.setTargetAtTime(0.3, audioCtx.currentTime, 0.05); // Volume do som de raspar
-            scratch(e);
-        }
-
-        function stopDrawing() {
-            isDrawing = false;
-            if(gainNode) gainNode.gain.setTargetAtTime(0, audioCtx.currentTime, 0.05); // Muta o som de raspar
-        }
-
         function scratch(e) {
-            if(!isDrawing || finished) return;
+            if(finished) return;
+            
+            // Remove guia visual
+            cue.style.display = 'none';
+
+            // Feedback Tátil (Vibração)
+            if (navigator.vibrate) navigator.vibrate(10);
+
             const rect = canvas.getBoundingClientRect();
             const x = (e.touches ? e.touches[0].clientX : e.clientX) - rect.left;
             const y = (e.touches ? e.touches[0].clientY : e.clientY) - rect.top;
 
             ctx.globalCompositeOperation = 'destination-out';
-            ctx.beginPath(); ctx.arc(x, y, 22, 0, Math.PI*2); ctx.fill();
+            ctx.beginPath(); ctx.arc(x, y, 25, 0, Math.PI*2); ctx.fill();
 
-            verificarProgresso();
-        }
-
-        function verificarProgresso() {
+            // Progresso
             const data = ctx.getImageData(0,0,300,150).data;
-            let pixelsTransparentes = 0;
-            for(let i=3; i<data.length; i+=4) { if(data[i] === 0) pixelsTransparentes++; }
+            let clear = 0;
+            for(let i=3; i<data.length; i+=4) if(data[i] == 0) clear++;
+            const pct = (clear / (data.length/4)) * 100;
+            document.getElementById('progress-fill').style.width = Math.min(pct * 2, 100) + '%';
             
-            const totalPixels = data.length / 4;
-            const porcentagem = Math.min(100, Math.round((pixelsTransparentes / totalPixels) * 100));
-            
-            // Atualiza barra visual
-            document.getElementById('progress-percent').innerText = porcentagem;
-            document.getElementById('progress-fill').style.width = porcentagem + '%';
-            
-            // Se raspar 45%, revela e finaliza
-            if(porcentagem > 45 && !finished) {
+            if(pct > 40 && !finished) {
                 finished = true;
-                stopDrawing();
-                canvas.style.opacity = '0'; // Some com o canvas suavemente
-                document.getElementById('progress-percent').innerText = '100';
-                document.getElementById('progress-fill').style.width = '100%';
-
-                abrirModal(sorteado);
+                document.getElementById('result-modal').style.display = 'flex';
+                document.getElementById('modal-desc').innerText = sorteado.nome;
+                if(sorteado.win) {
+                    document.getElementById('modal-title').innerText = "Você Ganhou! 🎉";
+                    confetti({ particleCount: 150, spread: 70 });
+                } else {
+                    document.getElementById('modal-title').innerText = "Poxa vida...";
+                }
             }
         }
 
-        // --- CRONÔMETRO E MODAL ---
-        function iniciarCronometro() {
-            let tempo = 15 * 60; // 15 minutos em segundos
-            const timerDisplay = document.getElementById('countdown');
-            const interval = setInterval(() => {
-                tempo--;
-                let min = Math.floor(tempo / 60).toString().padStart(2, '0');
-                let seg = (tempo % 60).toString().padStart(2, '0');
-                timerDisplay.innerText = `${min}:${seg}`;
-                if(tempo <= 0) { clearInterval(interval); timerDisplay.innerText = "EXPIRADO"; }
-            }, 1000);
-        }
-
-        function abrirModal(resultado) {
-            const modal = document.getElementById('result-modal');
-            const coupon = document.getElementById('coupon-box');
-            
-            document.getElementById('modal-desc').innerText = resultado.nome;
-            
-            if(resultado.win) {
-                document.getElementById('modal-title').innerText = "Você Ganhou! 🎉";
-                document.getElementById('modal-title').style.color = "#16a34a"; // Verde
-                playWinSound();
-                confetti({ particleCount: 200, spread: 90, origin: { y: 0.6 }, colors: ['#FFD700', '#ffffff', '#16a34a'] });
-                iniciarCronometro();
-            } else {
-                document.getElementById('modal-title').innerText = "Poxa vida...";
-                document.getElementById('modal-title').style.color = "#dc2626"; // Vermelho
-                document.getElementById('timer-box').style.display = 'none'; // Esconde cronômetro se perdeu
-            }
-
-            setTimeout(() => {
-                modal.style.display = 'flex';
-                // Pequeno delay para a animação de fade in
-                setTimeout(() => { modal.style.opacity = '1'; coupon.style.transform = 'translateY(0)'; }, 50);
-            }, 800); // Aguarda 0.8s após revelar para abrir o modal
-        }
-
-        // Eventos
-        canvas.onmousedown = startDrawing;
-        canvas.onmouseup = stopDrawing;
-        canvas.onmousemove = scratch;
-        canvas.onmouseleave = stopDrawing;
-        
-        canvas.ontouchstart = (e) => { e.preventDefault(); startDrawing(e); };
-        canvas.ontouchend = stopDrawing;
+        canvas.onmousedown = () => canvas.onmousemove = scratch;
         canvas.ontouchmove = (e) => { e.preventDefault(); scratch(e); };
     });
 </script>
