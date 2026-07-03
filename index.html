@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Raspadinha Premiada!</title>
+    <style>
+        body { font-family: Arial, sans-serif; text-align: center; background: #f3f4f6; margin: 0; padding: 20px; }
+        .box { max-width: 360px; margin: 30px auto; background: white; padding: 20px; border-radius: 15px; box-shadow: 0 4px 10px rgba(0,0,0,0.1); }
+        #canvas-zone { position: relative; width: 300px; height: 150px; margin: 20px auto; user-select: none; }
+        .prize-text { position: absolute; top: 0; left: 0; width: 300px; height: 150px; display: flex; align-items: center; justify-content: center; font-size: 22px; font-weight: bold; color: #1e1b4b; background: #e0e7ff; border-radius: 10px; z-index: 1; }
+        canvas { position: absolute; top: 0; left: 0; z-index: 2; border-radius: 10px; cursor: pointer; }
+    </style>
+</head>
+<body>
+
+<div class="box">
+    <h2>Sua Raspadinha do Posto</h2>
+    <p>Passe o dedo na área cinza abaixo para descobrir seu prêmio!</p>
+    
+    <div id="canvas-zone">
+        <div class="prize-text" id="prize">Carregando...</div>
+        <canvas id="scratch" width="300" height="150"></canvas>
+    </div>
+    <p style="font-size: 12px; color: #666;">Mostre a tela do prêmio diretamente no caixa para resgatar.</p>
+</div>
+
+<script>
+    const canvas = document.getElementById('scratch');
+    const ctx = canvas.getContext('2d');
+    const prizeDiv = document.getElementById('prize');
+
+    // 1. Trava anti-fraude simples: Se já jogou hoje, não deixa jogar de novo
+    if (localStorage.getItem('ja_jogou_hoje')) {
+        prizeDiv.innerText = "Você já jogou hoje!";
+        ctx.fillStyle = '#ffffff'; // Esconde a raspadinha
+        ctx.fillRect(0, 0, 300, 150);
+    } else {
+        // 2. Sistema de Sorteio interno
+        const listaPremios = ["Água Mineral 500ml", "Picolé de Frutas", "Tente Novamente Amigo!"];
+        const sorteio = listaPremios[Math.floor(Math.random() * listaPremios.length)];
+        prizeDiv.innerText = sorteio;
+
+        // 3. Desenha a cobertura cinza da raspadinha
+        ctx.fillStyle = '#b5b5b5';
+        ctx.fillRect(0, 0, 300, 150);
+        ctx.fillStyle = '#ffffff';
+        ctx.font = '16px Arial';
+        ctx.textAlign = 'center';
+        ctx.fillText('RASPE AQUI', 150, 80);
+
+        // 4. Lógica para "apagar" a tinta cinza ao passar o dedo/mouse
+        let isDrawing = false;
+        function scratch(e) {
+            if (!isDrawing) return;
+            const rect = canvas.getBoundingClientRect();
+            // Suporte para toque em celular ou clique de mouse
+            const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+            const clientY = e.touches ? e.touches[0].clientY : e.clientY;
+            const x = clientX - rect.left;
+            const y = clientY - rect.top;
+
+            ctx.globalCompositeOperation = 'destination-out';
+            ctx.beginPath();
+            ctx.arc(x, y, 20, 0, Math.PI * 2);
+            ctx.fill();
+
+            // Grava no navegador que ele já viu o prêmio para evitar fraudes ao recarregar
+            localStorage.setItem('ja_jogou_hoje', 'true');
+        }
+
+        canvas.addEventListener('mousedown', () => isDrawing = true);
+        canvas.addEventListener('mouseup', () => isDrawing = false);
+        canvas.addEventListener('mousemove', scratch);
+        canvas.addEventListener('touchstart', () => isDrawing = true);
+        canvas.addEventListener('touchend', () => isDrawing = false);
+        canvas.addEventListener('touchmove', scratch);
+    }
+</script>
+</body>
+</html>
